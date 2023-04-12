@@ -220,7 +220,10 @@ export default function Home() {
         setLoading(false);
         notifications.show({
           title: 'Error',
-          message: err.response?.data?.error || 'An unknown error occurred.',
+          message:
+            err.response?.data?.error ||
+            (err.response.code == 401 && ERROR_API_MESSAGES['UNAUTHORIZED']) ||
+            'Unable to reach configured API.',
           autoClose: 10000,
           color: 'red',
         });
@@ -303,7 +306,7 @@ export default function Home() {
           message:
             err.response?.data?.error ||
             (err.response.code == 401 && ERROR_API_MESSAGES['UNAUTHORIZED']) ||
-            'An unknown error occurred.',
+            'Unable to reach configured API.',
           autoClose: 10000,
           color: 'red',
         });
