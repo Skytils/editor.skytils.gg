@@ -49,6 +49,10 @@ enum SUCCESS_API_MESSAGES {
   PUT = 'Successfully updated your waypoints',
 }
 
+enum ERROR_API_MESSAGES {
+  'UNAUTHORIZED' = 'You are not authorized to access this resource.',
+}
+
 const useStyles = createStyles((theme) => ({
   root: {
     display: 'flex',
@@ -296,7 +300,10 @@ export default function Home() {
         console.error(err);
         notifications.show({
           title: 'Error',
-          message: err.response?.data?.error || 'An unknown error occurred.',
+          message:
+            err.response?.data?.error ||
+            (err.response.code == 401 && ERROR_API_MESSAGES['UNAUTHORIZED']) ||
+            'An unknown error occurred.',
           autoClose: 10000,
           color: 'red',
         });

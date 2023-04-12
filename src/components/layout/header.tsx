@@ -2,6 +2,8 @@ import { ActionIcon, Group, Header, UnstyledButton } from '@mantine/core';
 import { IconSettings } from '@tabler/icons-react';
 import Image from 'next/image';
 
+import logo from '@/../public/logo.png';
+
 import useStyles from './header.styles';
 
 export default function LayoutHeader() {
@@ -11,7 +13,7 @@ export default function LayoutHeader() {
     <Header height={80} p={10} className={classes.root}>
       <UnstyledButton component={'a'} href={'/'}>
         <Image
-          src={'/logo.png'}
+          src={logo}
           alt={'Skytils Logo'}
           width={64}
           height={64}
