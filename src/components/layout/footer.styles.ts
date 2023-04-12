@@ -1,4 +1,4 @@
-import { createStyles } from '@mantine/core'
+import { createStyles } from '@mantine/core';
 
 export default createStyles((theme) => ({
   text: {
@@ -12,4 +12,4 @@ export default createStyles((theme) => ({
         : theme.colors.gray[7],
     textDecoration: `underline`,
   },
-}))
+}));

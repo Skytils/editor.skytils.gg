@@ -2,8 +2,19 @@
   "extends": ["next/core-web-vitals", "prettier"],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/no-unused-vars": "off",
     "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error"
+    "simple-import-sort/exports": "error",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ]
   },
-  "plugins": ["simple-import-sort", "@typescript-eslint"]
+  "plugins": ["simple-import-sort", "@typescript-eslint", "unused-imports"]
 }

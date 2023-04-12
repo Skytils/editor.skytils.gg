@@ -1,9 +1,9 @@
-import { Center, Footer, Text } from '@mantine/core'
+import { Footer, Text } from '@mantine/core';
 
-import useStyles from './footer.styles'
+import useStyles from './footer.styles';
 
 export default function LayoutFooter() {
-  const { classes } = useStyles()
+  const { classes } = useStyles();
 
   return (
     <Footer height={30}>
@@ -30,5 +30,5 @@ export default function LayoutFooter() {
         </Text>
       </div>
     </Footer>
-  )
+  );
 }

@@ -1,13 +1,10 @@
-import type { ColorScheme } from '@mantine/core'
-import { getCookie } from 'cookies-next'
-import type { AppContext, AppProps } from 'next/app'
-import NextApp from 'next/app'
-import Head from 'next/head'
+import type { AppProps } from 'next/app';
+import Head from 'next/head';
 
-import AppLayout from '@/components/layout'
+import AppLayout from '@/components/layout';
 
-export default function App(props: AppProps & { colorScheme: ColorScheme }) {
-  const { Component, pageProps, colorScheme } = props
+export default function App(props: AppProps) {
+  const { Component, pageProps } = props;
 
   return (
     <>
@@ -19,17 +16,9 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
         />
       </Head>
 
-      <AppLayout defaultColorScheme={colorScheme}>
+      <AppLayout>
         <Component {...pageProps} />
       </AppLayout>
     </>
-  )
-}
-
-App.getInitialProps = async (appContext: AppContext) => {
-  const appProps = await NextApp.getInitialProps(appContext)
-  return {
-    ...appProps,
-    colorScheme: getCookie('mantine-color-scheme', appContext.ctx) || 'light',
-  }
+  );
 }

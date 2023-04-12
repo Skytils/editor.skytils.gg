@@ -1,4 +1,4 @@
-import { createStyles } from '@mantine/core'
+import { createStyles } from '@mantine/core';
 
 export default createStyles((theme) => ({
   root: {
@@ -15,4 +15,4 @@ export default createStyles((theme) => ({
       transition: 'rotate(90deg) 1s',
     },
   },
-}))
+}));

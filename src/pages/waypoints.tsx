@@ -1,4 +1,4 @@
-import type { AccordionControlProps } from '@mantine/core'
+import type { AccordionControlProps } from '@mantine/core';
 import {
   Accordion,
   ActionIcon,
@@ -14,7 +14,6 @@ import {
   NumberInput,
   Pagination,
   Paper,
-  ScrollArea,
   Select,
   SimpleGrid,
   Stack,
@@ -22,27 +21,27 @@ import {
   Textarea,
   TextInput,
   Title,
-} from '@mantine/core'
-import { useForm } from '@mantine/form'
-import { useClipboard } from '@mantine/hooks'
-import { notifications } from '@mantine/notifications'
-import { createStyles } from '@mantine/styles'
-import { IconCopy, IconDots, IconTrash } from '@tabler/icons-react'
-import axios from 'axios'
-import { getCookie } from 'cookies-next'
-import { useEffect, useState } from 'react'
-import { gunzip, gzip } from 'zlib'
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useClipboard } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
+import { createStyles } from '@mantine/styles';
+import { IconCopy, IconDots, IconTrash } from '@tabler/icons-react';
+import axios from 'axios';
+import { getCookie } from 'cookies-next';
+import { useEffect, useState } from 'react';
+import { gunzip, gzip } from 'zlib';
 
 import {
   convertWaypointOptionsToDecimal,
   convertWaypointOptionsToHex,
-} from '@/lib/functions'
+} from '@/lib/functions';
 import type {
   HostOptions,
   SkyblockIslandData,
   WaypointCategory,
   WaypointOptions,
-} from '@/types'
+} from '@/types';
 
 enum SUCCESS_API_MESSAGES {
   GET = 'Successfully retrieved waypoints.',
@@ -78,30 +77,32 @@ const useStyles = createStyles((theme) => ({
     width: 'fit-content%',
     marginTop: theme.spacing.md,
   },
-}))
+}));
 
 export default function Home() {
-  const { classes } = useStyles()
-  const clipboard = useClipboard({ timeout: 500 })
+  const { classes } = useStyles();
+  const clipboard = useClipboard({ timeout: 500 });
 
-  const [loading, setLoading] = useState<boolean>(false)
-  const [waypoints, setWaypoints] = useState<WaypointCategory[]>([])
-  const [islands, setIslands] = useState<SkyblockIslandData[]>([])
-  const [selectedIsland, setSelectedIsland] = useState<string>('all')
+  const [loading, setLoading] = useState<boolean>(false);
+  const [waypoints, setWaypoints] = useState<WaypointCategory[]>([]);
+  const [islands, setIslands] = useState<SkyblockIslandData[]>([]);
+  const [selectedIsland, setSelectedIsland] = useState<string>('all');
   const [selectedAccordion, setSelectedAccordion] = useState<string | null>(
     null,
-  )
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  );
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [createNewCategoryModal, setCreateNewCategoryModal] =
-    useState<boolean>(false)
-  const [importCategoryModal, setImportCategoryModal] = useState<boolean>(false)
-  const [exportCategoryModal, setExportCategoryModal] = useState<boolean>(false)
+    useState<boolean>(false);
+  const [importCategoryModal, setImportCategoryModal] =
+    useState<boolean>(false);
+  const [exportCategoryModal, setExportCategoryModal] =
+    useState<boolean>(false);
 
   const form = useForm<{ categories: WaypointCategory[] }>({
     initialValues: {
       categories: [],
     },
-  })
+  });
   const createCategoryForm = useForm<{ data: WaypointCategory }>({
     initialValues: {
       data: {
@@ -110,32 +111,32 @@ export default function Home() {
         island: '',
       },
     },
-  })
+  });
   const importCategoryForm = useForm<{ data: string }>({
     initialValues: {
       data: '',
     },
-  })
+  });
   const exportCategoryForm = useForm<{
-    selectedCategory: string
-    selected: string[]
+    selectedCategory: string;
+    selected: string[];
   }>({
     initialValues: {
       selectedCategory: '',
       selected: [],
     },
-  })
+  });
 
   useEffect(() => {
-    makeRequest('GET')
-  }, [])
+    makeRequest('GET');
+  }, []);
 
   const makeRequest = (
     method: 'GET' | 'POST' | 'PUT',
     body?: Record<any, any>,
   ) => {
-    setLoading(true)
-    const cookie = getCookie('HostOptions')
+    setLoading(true);
+    const cookie = getCookie('HostOptions');
     if (!cookie) {
       return notifications.show({
         title: 'Error',
@@ -146,9 +147,9 @@ export default function Home() {
           </Text>
         ),
         autoClose: 7500,
-      })
+      });
     }
-    const hostOptions: HostOptions = JSON.parse(cookie as string)
+    const hostOptions: HostOptions = JSON.parse(cookie as string);
     if (!hostOptions.password) {
       return notifications.show({
         title: 'Error',
@@ -159,7 +160,7 @@ export default function Home() {
           </Text>
         ),
         autoClose: 7500,
-      })
+      });
     }
     return axios
       .all([
@@ -192,56 +193,58 @@ export default function Home() {
             ...category,
             waypoints: category.waypoints.sort(
               (a: WaypointOptions, b: WaypointOptions) => {
-                return a.name.localeCompare(b.name, 'en', { numeric: true })
+                return a.name.localeCompare(b.name, 'en', {
+                  numeric: true,
+                });
               },
             ),
-          }
-        })
-        setWaypoints(categories)
-        setIslands(res[1].data)
-        form.setValues({ categories })
-        setLoading(false)
+          };
+        });
+        setWaypoints(categories);
+        setIslands(res[1].data);
+        form.setValues({ categories });
+        setLoading(false);
         notifications.show({
           title: 'Success',
           message: SUCCESS_API_MESSAGES[method],
           autoClose: 10000,
           color: 'green',
-        })
+        });
       })
       .catch((err) => {
-        console.error(err)
-        setLoading(false)
+        console.error(err);
+        setLoading(false);
         notifications.show({
           title: 'Error',
           message: err.response?.data?.error || 'An unknown error occurred.',
           autoClose: 10000,
           color: 'red',
-        })
-      })
-  }
+        });
+      });
+  };
 
   const handleResetValues = () => {
     try {
-      form.setValues({ categories: waypoints })
+      form.setValues({ categories: waypoints });
       notifications.show({
         title: 'Success',
         message: 'Successfully reset your values.',
         autoClose: 10000,
         color: 'green',
-      })
+      });
     } catch (e) {
-      console.error(e)
+      console.error(e);
       notifications.show({
         title: 'Error',
         message: 'An unknown error occurred.',
         autoClose: 10000,
         color: 'red',
-      })
+      });
     }
-  }
+  };
 
   const handleSubmit = (values: WaypointCategory[]) => {
-    const cookie = getCookie('HostOptions')
+    const cookie = getCookie('HostOptions');
     if (!cookie) {
       return notifications.show({
         title: 'Error',
@@ -252,9 +255,9 @@ export default function Home() {
           </Text>
         ),
         autoClose: 7500,
-      })
+      });
     }
-    const hostOptions: HostOptions = JSON.parse(cookie as string)
+    const hostOptions: HostOptions = JSON.parse(cookie as string);
     if (!hostOptions.password) {
       return notifications.show({
         title: 'Error',
@@ -265,7 +268,7 @@ export default function Home() {
           </Text>
         ),
         autoClose: 7500,
-      })
+      });
     }
     axios
       .post(
@@ -287,23 +290,23 @@ export default function Home() {
           message: 'Successfully saved your waypoints.',
           autoClose: 10000,
           color: 'green',
-        })
+        });
       })
       .catch((err) => {
-        console.error(err)
+        console.error(err);
         notifications.show({
           title: 'Error',
           message: err.response?.data?.error || 'An unknown error occurred.',
           autoClose: 10000,
           color: 'red',
-        })
-      })
-  }
+        });
+      });
+  };
 
   const OuterAccordionControl = (
     props: AccordionControlProps & {
-      category: WaypointCategory
-      categoryIndex: number
+      category: WaypointCategory;
+      categoryIndex: number;
     },
   ) => {
     return (
@@ -329,11 +332,11 @@ export default function Home() {
                     y: 0,
                     z: 0,
                   },
-                )
+                );
                 handleSwitchAccordion(
                   `${props.category.name}-${props.categoryIndex}`,
-                )
-                console.log(currentPage)
+                );
+                console.log(currentPage);
               }}
             >
               Add Waypoint
@@ -343,11 +346,11 @@ export default function Home() {
                 form.setValues(({ categories }) => {
                   let category = (categories as WaypointCategory[])[
                     props.categoryIndex
-                  ]
+                  ];
                   category.waypoints.forEach((waypoint) => {
-                    waypoint.enabled = true
-                  })
-                  return { categories }
+                    waypoint.enabled = true;
+                  });
+                  return { categories };
                 })
               }
             >
@@ -358,11 +361,11 @@ export default function Home() {
                 form.setValues(({ categories }) => {
                   let category = (categories as WaypointCategory[])[
                     props.categoryIndex
-                  ]
+                  ];
                   category.waypoints.forEach((waypoint) => {
-                    waypoint.enabled = false
-                  })
-                  return { categories }
+                    waypoint.enabled = false;
+                  });
+                  return { categories };
                 })
               }
             >
@@ -380,14 +383,14 @@ export default function Home() {
           </Menu.Dropdown>
         </Menu>
       </Box>
-    )
-  }
+    );
+  };
 
   const InnerAccordionControl = (
     props: AccordionControlProps & {
-      categoryIndex: number
-      waypointIndex: number
-      waypoint: WaypointOptions
+      categoryIndex: number;
+      waypointIndex: number;
+      waypoint: WaypointOptions;
     },
   ) => {
     return (
@@ -408,7 +411,7 @@ export default function Home() {
                   `categories.${props.categoryIndex}.waypoints`,
                   props.waypoint,
                   props.waypointIndex + 1,
-                )
+                );
               }}
             >
               Duplicate Waypoint
@@ -420,7 +423,7 @@ export default function Home() {
                 form.removeListItem(
                   `categories.${props.categoryIndex}.waypoints`,
                   props.waypointIndex,
-                )
+                );
               }}
             >
               Delete Waypoint
@@ -428,12 +431,12 @@ export default function Home() {
           </Menu.Dropdown>
         </Menu>
       </Box>
-    )
-  }
+    );
+  };
   const handleSwitchAccordion = (value: string | null) => {
-    setSelectedAccordion(value)
-    setCurrentPage(1)
-  }
+    setSelectedAccordion(value);
+    setCurrentPage(1);
+  };
 
   const handleCreateModal = (value: WaypointCategory) => {
     form.insertListItem(`categories`, {
@@ -441,20 +444,20 @@ export default function Home() {
       waypoints: [
         { name: '', color: '#ff0000', enabled: true, x: 0, y: 0, z: 0 },
       ],
-    })
-    setCreateNewCategoryModal(false)
-    createCategoryForm.reset()
-  }
+    });
+    setCreateNewCategoryModal(false);
+    createCategoryForm.reset();
+  };
 
   const handleImportModal = (value: string) => {
     if (value.startsWith(`<Skytils-Waypoint-Data>(V`)) {
       const version = parseInt(
         value.split(`<Skytils-Waypoint-Data>(V`)[1].split(')')[0],
-      )
-      const content = value.split(`:`)[1]
-      if (version !== 1) throw new Error(`Invalid version: ${version}!`)
+      );
+      const content = value.split(`:`)[1];
+      if (version !== 1) throw new Error(`Invalid version: ${version}!`);
       gunzip(Buffer.from(content, 'base64'), (err, uncompressed) => {
-        if (err) throw err
+        if (err) throw err;
         const category = convertWaypointOptionsToHex(
           JSON.parse(uncompressed.toString()).categories,
         ).map((category: WaypointCategory) => {
@@ -462,26 +465,28 @@ export default function Home() {
             ...category,
             waypoints: category.waypoints.sort(
               (a: WaypointOptions, b: WaypointOptions) => {
-                return a.name.localeCompare(b.name, 'en', { numeric: true })
+                return a.name.localeCompare(b.name, 'en', {
+                  numeric: true,
+                });
               },
             ),
-          }
-        })
+          };
+        });
         category.forEach((category: WaypointCategory) => {
-          form.insertListItem(`categories`, category)
-        })
-      })
+          form.insertListItem(`categories`, category);
+        });
+      });
     }
-    importCategoryForm.reset()
-    setImportCategoryModal(false)
-  }
+    importCategoryForm.reset();
+    setImportCategoryModal(false);
+  };
 
   const handleExport = ({
     selectedCategory,
     selected,
   }: {
-    selectedCategory: string
-    selected: string[]
+    selectedCategory: string;
+    selected: string[];
   }) => {
     const category: WaypointCategory = {
       name: form.values.categories[parseInt(selectedCategory.split('-')[1])]
@@ -493,10 +498,10 @@ export default function Home() {
       ),
       island:
         form.values.categories[parseInt(selectedCategory.split('-')[1])].island,
-    }
+    };
     const compressed = JSON.stringify({
       categories: convertWaypointOptionsToDecimal([category]),
-    })
+    });
     gzip(compressed, (err, compressed) => {
       if (err)
         return notifications.show({
@@ -504,20 +509,20 @@ export default function Home() {
           message: 'An error occurred while exporting your waypoints.',
           color: 'red',
           autoClose: 10000,
-        })
+        });
       clipboard.copy(
         `<Skytils-Waypoint-Data>(V1):${compressed.toString('base64')}`,
-      )
-      setExportCategoryModal(false)
-      exportCategoryForm.reset()
+      );
+      setExportCategoryModal(false);
+      exportCategoryForm.reset();
       notifications.show({
         title: 'Success',
         message: 'Your waypoints have been exported to your clipboard.',
         color: 'green',
         autoClose: 10000,
-      })
-    })
-  }
+      });
+    });
+  };
 
   return (
     <div className={classes.root}>
@@ -533,8 +538,8 @@ export default function Home() {
           <Modal
             opened={createNewCategoryModal}
             onClose={() => {
-              setCreateNewCategoryModal(false)
-              createCategoryForm.reset()
+              setCreateNewCategoryModal(false);
+              createCategoryForm.reset();
             }}
             title={'Create New Category'}
             size={'md'}
@@ -557,7 +562,10 @@ export default function Home() {
                   withAsterisk={true}
                   label={'Island'}
                   data={islands.map((i) => {
-                    return { value: i.mode, label: i.displayName }
+                    return {
+                      value: i.mode,
+                      label: i.displayName,
+                    };
                   })}
                   dropdownPosition="bottom"
                   searchable
@@ -569,8 +577,8 @@ export default function Home() {
                 <Group position={'apart'} mt={'md'}>
                   <Button
                     onClick={() => {
-                      setCreateNewCategoryModal(false)
-                      createCategoryForm.reset()
+                      setCreateNewCategoryModal(false);
+                      createCategoryForm.reset();
                     }}
                   >
                     Cancel
@@ -591,7 +599,7 @@ export default function Home() {
           <Modal
             opened={importCategoryModal}
             onClose={() => {
-              setImportCategoryModal(false)
+              setImportCategoryModal(false);
             }}
             title={'Import Category'}
           >
@@ -611,8 +619,8 @@ export default function Home() {
               <Group position={'apart'} mt={'md'}>
                 <Button
                   onClick={() => {
-                    setImportCategoryModal(false)
-                    importCategoryForm.reset()
+                    setImportCategoryModal(false);
+                    importCategoryForm.reset();
                   }}
                 >
                   Cancel
@@ -632,8 +640,8 @@ export default function Home() {
           <Modal
             opened={exportCategoryModal}
             onClose={() => {
-              setExportCategoryModal(false)
-              exportCategoryForm.reset()
+              setExportCategoryModal(false);
+              exportCategoryForm.reset();
             }}
             title={'Export Category'}
           >
@@ -646,7 +654,7 @@ export default function Home() {
                     return {
                       value: `${category.name}-${_}`,
                       label: category.name || 'Unnamed Category',
-                    }
+                    };
                   },
                 )}
                 withinPortal={true}
@@ -665,8 +673,8 @@ export default function Home() {
                     return {
                       ...prev,
                       selected: value,
-                    }
-                  })
+                    };
+                  });
                 }}
               >
                 <SimpleGrid cols={2} spacing={2}>
@@ -691,8 +699,8 @@ export default function Home() {
                               (data: WaypointOptions, _) =>
                                 `${data.name || ''}-${_}`,
                             ),
-                        }
-                      })
+                        };
+                      });
                     }}
                   >
                     Select All
@@ -709,8 +717,8 @@ export default function Home() {
                         return {
                           ...prev,
                           selected: [],
-                        }
-                      })
+                        };
+                      });
                     }}
                   >
                     Deselect All
@@ -728,15 +736,15 @@ export default function Home() {
                           value={`${data.name}-${_}`}
                           label={data.name || 'Unnamed Waypoint'}
                         />
-                      )
+                      );
                     })}
                 </SimpleGrid>
               </Checkbox.Group>
               <Group position={'apart'} mt={'md'}>
                 <Button
                   onClick={() => {
-                    setImportCategoryModal(false)
-                    exportCategoryForm.reset()
+                    setImportCategoryModal(false);
+                    exportCategoryForm.reset();
                   }}
                 >
                   Cancel
@@ -782,7 +790,10 @@ export default function Home() {
               <Select
                 data={[{ value: 'all', label: 'All' }].concat(
                   islands.map((i) => {
-                    return { value: i.mode, label: i.displayName }
+                    return {
+                      value: i.mode,
+                      label: i.displayName,
+                    };
                   }),
                 )}
                 value={selectedIsland}
@@ -806,7 +817,7 @@ export default function Home() {
                 ).map(([categoryKey, category], categoryIndex) => {
                   categoryIndex = Object.entries(
                     form.values.categories,
-                  ).findIndex(([_, sub]) => sub == category)
+                  ).findIndex(([_, sub]) => sub == category);
                   return (
                     <Accordion.Item
                       key={categoryIndex}
@@ -853,9 +864,18 @@ export default function Home() {
                                           classes.waypointSettingsAccordion
                                         }
                                         breakpoints={[
-                                          { minWidth: 'sm', cols: 1 },
-                                          { minWidth: 'md', cols: 2 },
-                                          { minWidth: 1200, cols: 3 },
+                                          {
+                                            minWidth: 'sm',
+                                            cols: 1,
+                                          },
+                                          {
+                                            minWidth: 'md',
+                                            cols: 2,
+                                          },
+                                          {
+                                            minWidth: 1200,
+                                            cols: 3,
+                                          },
                                         ]}
                                       >
                                         <TextInput
@@ -885,7 +905,9 @@ export default function Home() {
                                               waypointIndex +
                                               (currentPage - 1) * 10
                                             }.enabled`,
-                                            { type: 'checkbox' },
+                                            {
+                                              type: 'checkbox',
+                                            },
                                           )}
                                         />
                                         <NumberInput
@@ -933,7 +955,7 @@ export default function Home() {
                           ))}
                       </Accordion.Panel>
                     </Accordion.Item>
-                  )
+                  );
                 })}
               </Accordion>
               <Group position={'apart'} mt={'md'}>
@@ -952,5 +974,5 @@ export default function Home() {
         </>
       )}
     </div>
-  )
+  );
 }

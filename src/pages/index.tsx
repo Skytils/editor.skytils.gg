@@ -1,7 +1,7 @@
-import { Paper, SimpleGrid, Text, Title } from '@mantine/core'
-import { createStyles } from '@mantine/styles'
+import { Paper, SimpleGrid, Text, Title } from '@mantine/core';
+import { createStyles } from '@mantine/styles';
 
-import { EDITOR_LINKS } from '@/constants'
+import { EDITOR_LINKS } from '@/constants';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -11,10 +11,10 @@ const useStyles = createStyles((theme) => ({
     minHeight: '85vh',
     height: 'fit-content',
   },
-}))
+}));
 
 export default function Home() {
-  const { classes } = useStyles()
+  const { classes } = useStyles();
 
   return (
     <div className={classes.container}>
@@ -42,5 +42,5 @@ export default function Home() {
         </SimpleGrid>
       </Paper>
     </div>
-  )
+  );
 }

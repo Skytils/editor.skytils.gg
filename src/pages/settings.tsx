@@ -6,15 +6,14 @@ import {
   SimpleGrid,
   TextInput,
   Title,
-} from '@mantine/core'
-import { useLocalStorage } from '@mantine/hooks'
-import { notifications } from '@mantine/notifications'
-import { createStyles } from '@mantine/styles'
-import { getCookie, setCookie } from 'cookies-next'
-import { useEffect, useState } from 'react'
+} from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { createStyles } from '@mantine/styles';
+import { getCookie, setCookie } from 'cookies-next';
+import { useEffect, useState } from 'react';
 
-import * as constants from '@/constants'
-import type { HostOptions } from '@/types'
+import * as constants from '@/constants';
+import type { HostOptions } from '@/types';
 
 const useStyles = createStyles((theme) => ({
   container: {
@@ -24,38 +23,38 @@ const useStyles = createStyles((theme) => ({
     minHeight: '85vh',
     height: 'fit-content',
   },
-}))
+}));
 
 export default function Home() {
-  const { classes } = useStyles()
+  const { classes } = useStyles();
   const [hostOptions, setHostOptions] = useState<HostOptions>(
     constants.DEFAULT_HOST_OPTIONS,
-  )
+  );
 
   useEffect(() => {
-    const cookie = getCookie('HostOptions')
+    const cookie = getCookie('HostOptions');
     if (!cookie) {
       setCookie('HostOptions', JSON.stringify(constants.DEFAULT_HOST_OPTIONS), {
         maxAge: 60 * 60 * 24 * 30,
-      })
+      });
     }
     if (typeof cookie === 'string') {
-      setHostOptions(JSON.parse(cookie))
-      console.log(JSON.parse(cookie))
+      setHostOptions(JSON.parse(cookie));
+      console.log(JSON.parse(cookie));
     }
-  }, [])
+  }, []);
 
   const handleSave = () => {
     setCookie('HostOptions', JSON.stringify(hostOptions), {
       maxAge: 60 * 60 * 24 * 30,
-    })
+    });
     notifications.show({
       title: 'Success',
       message: 'Host options saved successfully.',
       autoClose: 7500,
       color: 'green',
-    })
-  }
+    });
+  };
 
   return (
     <div className={classes.container}>
@@ -76,14 +75,20 @@ export default function Home() {
             label={'Host'}
             value={hostOptions.host}
             onChange={(e) =>
-              setHostOptions({ ...hostOptions, host: e.currentTarget.value })
+              setHostOptions({
+                ...hostOptions,
+                host: e.currentTarget.value,
+              })
             }
           />
           <NumberInput
             label={'Port'}
             value={hostOptions.port}
             onChange={(e) =>
-              setHostOptions({ ...hostOptions, port: e as number })
+              setHostOptions({
+                ...hostOptions,
+                port: e as number,
+              })
             }
           />
           <PasswordInput
@@ -102,5 +107,5 @@ export default function Home() {
         </Button>
       </Paper>
     </div>
-  )
+  );
 }

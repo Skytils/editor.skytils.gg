@@ -1,9 +1,9 @@
-import type { EditorLink, HostOptions } from '@/types'
+import type { EditorLink, HostOptions } from '@/types';
 
 const DEFAULT_HOST_OPTIONS: HostOptions = {
   host: 'localhost',
   port: 56969,
-}
+};
 
 const EDITOR_LINKS: EditorLink[] = [
   {
@@ -11,6 +11,6 @@ const EDITOR_LINKS: EditorLink[] = [
     description: 'A web-based editor for creating waypoints in-game.',
     route: '/waypoints',
   },
-]
+];
 
-export { DEFAULT_HOST_OPTIONS, EDITOR_LINKS }
+export { DEFAULT_HOST_OPTIONS, EDITOR_LINKS };
