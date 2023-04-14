@@ -1,10 +1,12 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useState } from 'react';
 
 import AppLayout from '@/components/layout';
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props;
+  const [adBlockerNotice, setAdBlockerNotice] = useState(true);
 
   return (
     <>

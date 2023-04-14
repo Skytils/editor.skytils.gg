@@ -1,6 +1,7 @@
 import { Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import { createStyles } from '@mantine/styles';
 
+import AdBlockerNotice from '@/components/layout/adblocker';
 import { EDITOR_LINKS } from '@/constants';
 
 const useStyles = createStyles((theme) => ({
@@ -41,6 +42,7 @@ export default function Home() {
           ))}
         </SimpleGrid>
       </Paper>
+      <AdBlockerNotice />
     </div>
   );
 }
