@@ -50,7 +50,7 @@ enum SUCCESS_API_MESSAGES {
 }
 
 enum ERROR_API_MESSAGES {
-  'UNAUTHORIZED' = 'You are not authorized to access this resource.',
+  'UNAUTHORIZED' = 'You are not authorized to access this resource. Make sure you have entered the correct password in the settings page.',
 }
 
 const useStyles = createStyles((theme) => ({
@@ -217,14 +217,14 @@ export default function Home() {
       })
       .catch((err) => {
         console.error(err);
-        setLoading(false);
         notifications.show({
           title: 'Error',
           message:
+            (err.response?.status == 401 &&
+              ERROR_API_MESSAGES['UNAUTHORIZED']) ||
             err.response?.data?.error ||
-            (err.response.code == 401 && ERROR_API_MESSAGES['UNAUTHORIZED']) ||
             'Unable to reach configured API.',
-          autoClose: 10000,
+          autoClose: false,
           color: 'red',
         });
       });
@@ -244,7 +244,7 @@ export default function Home() {
       notifications.show({
         title: 'Error',
         message: 'An unknown error occurred.',
-        autoClose: 10000,
+        autoClose: false,
         color: 'red',
       });
     }
@@ -304,10 +304,11 @@ export default function Home() {
         notifications.show({
           title: 'Error',
           message:
+            (err.response?.status == 401 &&
+              ERROR_API_MESSAGES['UNAUTHORIZED']) ||
             err.response?.data?.error ||
-            (err.response.code == 401 && ERROR_API_MESSAGES['UNAUTHORIZED']) ||
             'Unable to reach configured API.',
-          autoClose: 10000,
+          autoClose: false,
           color: 'red',
         });
       });
@@ -460,17 +461,11 @@ export default function Home() {
   };
 
   const handleImportModal = (value: string) => {
-    if (value.startsWith(`<Skytils-Waypoint-Data>(V`)) {
-      const version = parseInt(
-        value.split(`<Skytils-Waypoint-Data>(V`)[1].split(')')[0],
-      );
-      const content = value.split(`:`)[1];
-      if (version !== 1) throw new Error(`Invalid version: ${version}!`);
-      gunzip(Buffer.from(content, 'base64'), (err, uncompressed) => {
-        if (err) throw err;
-        const category = convertWaypointOptionsToHex(
-          JSON.parse(uncompressed.toString()).categories,
-        ).map((category: WaypointCategory) => {
+    const sbeRegex =
+      /(?:\.?\/?crystalwaypoint parse )?(?<name>[a-zA-Z\d]+)@-(?<x>[-\d]+),(?<y>[-\d]+),(?<z>[-\d]+)\\?n?/g;
+    const formatCategory = (data: any) => {
+      return convertWaypointOptionsToHex(data).map(
+        (category: WaypointCategory) => {
           return {
             ...category,
             waypoints: category.waypoints.sort(
@@ -481,10 +476,61 @@ export default function Home() {
               },
             ),
           };
-        });
-        category.forEach((category: WaypointCategory) => {
+        },
+      );
+    };
+
+    if (value.startsWith(`<Skytils-Waypoint-Data>(V`)) {
+      const version = parseInt(
+        value.split(`<Skytils-Waypoint-Data>(V`)[1].split(')')[0],
+      );
+      const content = value.split(`:`)[1];
+      if (version !== 1) throw new Error(`Invalid version: ${version}!`);
+      gunzip(Buffer.from(content, 'base64'), (err, uncompressed) => {
+        if (err) throw err;
+        formatCategory(JSON.parse(uncompressed.toString()).categories).forEach(
+          (category: WaypointCategory) => {
+            form.insertListItem(`categories`, category);
+          },
+        );
+      });
+    } else if (Buffer.from(value, 'base64').toString('base64') === value) {
+      formatCategory(
+        JSON.parse(Buffer.from(value, 'base64').toString()).categories,
+      ).forEach((category: WaypointCategory) => {
+        form.insertListItem(`categories`, category);
+      });
+    } else if (sbeRegex.test(value)) {
+      let category: WaypointCategory = {
+        name: 'Imported',
+        island: 'crystal_hollows',
+        waypoints: [],
+      };
+      const waypoints = Array.from(
+        value.trim().replace('\n', '').matchAll(sbeRegex),
+      ).map((match) => {
+        return {
+          name: match?.groups!.name,
+          x: parseInt(match?.groups!.x),
+          y: parseInt(match?.groups!.y),
+          z: parseInt(match?.groups!.z),
+          color: '#ff0000',
+          enabled: true,
+        };
+      });
+      formatCategory([{ ...category, waypoints }]).forEach(
+        (category: WaypointCategory) => {
           form.insertListItem(`categories`, category);
-        });
+        },
+      );
+    } else {
+      importCategoryForm.reset();
+      setImportCategoryModal(false);
+      return notifications.show({
+        title: 'Invalid Data',
+        message: 'The data you entered is invalid.',
+        color: 'red',
+        autoClose: 10000,
       });
     }
     importCategoryForm.reset();
@@ -619,9 +665,9 @@ export default function Home() {
               )}
             >
               <Textarea
-                label={'Category GZIP'}
+                label={'Category Data'}
                 minRows={5}
-                placeholder={'Paste your category gzip here'}
+                placeholder={'Paste your category data here'}
                 required={true}
                 withAsterisk={true}
                 {...importCategoryForm.getInputProps('data')}
@@ -675,81 +721,85 @@ export default function Home() {
                 searchable={true}
                 {...exportCategoryForm.getInputProps('selectedCategory')}
               />
-              <Checkbox.Group
-                label={'Waypoints'}
-                value={exportCategoryForm.values.selected}
-                onChange={(value) => {
-                  exportCategoryForm.setValues((prev) => {
-                    return {
-                      ...prev,
-                      selected: value,
-                    };
-                  });
-                }}
-              >
-                <SimpleGrid cols={2} spacing={2}>
-                  <Button
-                    variant={'outline'}
-                    style={{
-                      width: '75%',
-                      marginLeft: 'auto',
-                      marginRight: 'auto',
-                    }}
-                    onClick={() => {
-                      exportCategoryForm.setValues((prev) => {
-                        return {
-                          ...prev,
-                          selected: form.values.categories
-                            .find(
-                              (category: WaypointCategory, _) =>
-                                `${category.name}-${_}` ===
-                                exportCategoryForm.values.selectedCategory,
-                            )
-                            ?.waypoints.map(
-                              (data: WaypointOptions, _) =>
-                                `${data.name || ''}-${_}`,
-                            ),
-                        };
-                      });
-                    }}
-                  >
-                    Select All
-                  </Button>
-                  <Button
-                    variant={'outline'}
-                    style={{
-                      width: '75%',
-                      marginLeft: 'auto',
-                      marginRight: 'auto',
-                    }}
-                    onClick={() => {
-                      exportCategoryForm.setValues((prev) => {
-                        return {
-                          ...prev,
-                          selected: [],
-                        };
-                      });
-                    }}
-                  >
-                    Deselect All
-                  </Button>
-                  {form.values.categories
-                    .find(
-                      (category: WaypointCategory, _) =>
-                        `${category.name}-${_}` ===
-                        exportCategoryForm.values.selectedCategory,
-                    )
-                    ?.waypoints.map((data: WaypointOptions, _) => {
-                      return (
-                        <Checkbox
-                          key={`${_}`}
-                          value={`${data.name}-${_}`}
-                          label={data.name || 'Unnamed Waypoint'}
-                        />
-                      );
-                    })}
-                </SimpleGrid>
-              </Checkbox.Group>
+
+              {exportCategoryForm.values.selectedCategory && (
+                <Checkbox.Group
+                  label={'Waypoints'}
+                  value={exportCategoryForm.values.selected}
+                  onChange={(value) => {
+                    exportCategoryForm.setValues((prev) => {
+                      return {
+                        ...prev,
+                        selected: value,
+                      };
+                    });
+                  }}
+                >
+                  <SimpleGrid cols={2} spacing={2}>
+                    <Button
+                      variant={'outline'}
+                      style={{
+                        width: '75%',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                      }}
+                      onClick={() => {
+                        exportCategoryForm.setValues((prev) => {
+                          return {
+                            ...prev,
+                            selected: form.values.categories
+                              .find(
+                                (category: WaypointCategory, _) =>
+                                  `${category.name}-${_}` ===
+                                  exportCategoryForm.values.selectedCategory,
+                              )
+                              ?.waypoints.map(
+                                (data: WaypointOptions, _) =>
+                                  `${data.name || ''}-${_}`,
+                              ),
+                          };
+                        });
+                      }}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant={'outline'}
+                      style={{
+                        width: '75%',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                      }}
+                      onClick={() => {
+                        exportCategoryForm.setValues((prev) => {
+                          return {
+                            ...prev,
+                            selected: [],
+                          };
+                        });
+                      }}
+                    >
+                      Deselect All
+                    </Button>
+                    {form.values.categories
+                      .find(
+                        (category: WaypointCategory, _) =>
+                          `${category.name}-${_}` ===
+                          exportCategoryForm.values.selectedCategory,
+                      )
+                      ?.waypoints.map((data: WaypointOptions, _) => {
+                        return (
+                          <Checkbox
+                            key={`${_}`}
+                            value={`${data.name}-${_}`}
+                            label={data.name || 'Unnamed Waypoint'}
+                          />
+                        );
+                      })}
+                  </SimpleGrid>
+                </Checkbox.Group>
+              )}
+
               <Group position={'apart'} mt={'md'}>
                 <Button
                   onClick={() => {
